@@ -78,6 +78,25 @@ export class Orders {
         });
     }
 
+    public listOrdersByNextToken(options: AmazonTypes.ListOrdersByNextTokenRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.ListOrdersByNextTokenResult) => void) {
+        var request: Request.Request = new Request.Request(this.endpoint, this.credentials);
+
+        request.addParam(new AmazonTypes.StringParameter('Action', 'ListOrders'));
+        request.addParam(new AmazonTypes.StringParameter('SellerId', this.credentials.sellerId));
+        request.addParam(new AmazonTypes.StringParameter('Version', this.version));
+
+        request.addParam(new AmazonTypes.StringParameter('NextToken', options.NextToken));
+
+        request.send(function(err, result) {
+            if (err) {
+                callback(err);
+            }
+            else {
+                callback(null, new AmazonTypes.ListOrdersByNextTokenResult(result));
+            }
+        });
+    }
+
     public listOrderItems(options: AmazonTypes.ListOrderItemsRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.ListOrderItemsResult) => void) {
         var request: Request.Request = new Request.Request(this.endpoint, this.credentials);
 

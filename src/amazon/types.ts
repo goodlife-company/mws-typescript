@@ -35,6 +35,10 @@ export interface ListOrdersRequest {
     MaxResultsPerPage?: number;
 }
 
+export interface ListOrdersByNextTokenRequest {
+    NextToken: string
+}
+
 export interface Order {
     AmazonOrderId: string,
     SellerOrderId?: string,
@@ -187,8 +191,10 @@ export class OrderConverter {
 
 export class ListOrdersResult {
     public orderList: Order[];
+    public nextToken: string;
     constructor(public rawData: any) {
         this.orderList = [];
+        this.nextToken = null;
 
         if (rawData['ListOrdersResponse']['ListOrdersResult']['Orders'] == '')
             return;
@@ -198,6 +204,28 @@ export class ListOrdersResult {
         var orderList = _.isArray(rawList) ? rawList : [rawList];
 
         this.orderList = _.map(orderList, OrderConverter.convertFromParsedXML);
+        if (rawData['ListOrdersResponse']['ListOrdersResult']['NextToken'])
+            this.nextToken = rawData['ListOrdersResponse']['ListOrdersResult']['NextToken'];
+    }
+}
+
+export class ListOrdersByNextTokenResult {
+    public orderList: Order[];
+    public nextToken: string;
+    constructor(public rawData: any) {
+        this.orderList = [];
+        this.nextToken = null;
+
+        if (rawData['ListOrdersByNextTokenResponse']['ListOrdersByNextTokenResult']['Orders'] == '')
+            return;
+
+        var rawList = rawData['ListOrdersByNextTokenResponse']['ListOrdersByNextTokenResult']['Orders']['Order'];
+
+        var orderList = _.isArray(rawList) ? rawList : [rawList];
+
+        this.orderList = _.map(orderList, OrderConverter.convertFromParsedXML);
+        if (rawData['ListOrdersByNextTokenResponse']['ListOrdersByNextTokenResult']['NextToken'])
+            this.nextToken = rawData['ListOrdersByNextTokenResponse']['ListOrdersByNextTokenResult']['NextToken'];
     }
 }
 
