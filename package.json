@@ -6,6 +6,7 @@
     "main": "dist/index.js",
     "license": "Forked from Goodlife Company, enhanced by yoyobo",
     "repository": "git@github.com:yoyobo/mws-typescript.git",
+    "types": "dist/index.d.ts",
     "scripts": {
         "pretest": "tsc -p src/spec",
         "test": "jasmine",
