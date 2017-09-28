@@ -81,7 +81,7 @@ export class Orders {
     public listOrdersByNextToken(options: AmazonTypes.ListOrdersByNextTokenRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.ListOrdersByNextTokenResult) => void) {
         var request: Request.Request = new Request.Request(this.endpoint, this.credentials);
 
-        request.addParam(new AmazonTypes.StringParameter('Action', 'ListOrders'));
+        request.addParam(new AmazonTypes.StringParameter('Action', 'ListOrdersByNextToken'));
         request.addParam(new AmazonTypes.StringParameter('SellerId', this.credentials.sellerId));
         request.addParam(new AmazonTypes.StringParameter('Version', this.version));
 
