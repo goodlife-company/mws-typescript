@@ -1,5 +1,3 @@
-///<reference path="../../typings/main.d.ts"/>
-
 import moment = require('moment');
 import Amazon = require('../amazon/api');
 import util = require('util');
