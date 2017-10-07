@@ -7,4 +7,5 @@ Done:
 
 To do:
 * Further extension of API modules (missing requests)
+* Authentication by MWS AuthToken
 * ...
