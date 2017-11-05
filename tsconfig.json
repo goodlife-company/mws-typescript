@@ -10,8 +10,6 @@
   "exclude": [
     "node_modules",
     "src/spec",
-    "typings/main.d.ts",
-    "typings/main",
     "dist"
   ]
 }
