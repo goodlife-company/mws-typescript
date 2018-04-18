@@ -48,7 +48,7 @@ describe('CSV', function() {
             columnDelim: "\t",
             lineDelim: "\r\n",
             decSep: "D",
-            inputEncoding: CSV.Encoding['UTF-8'],
+            // inputEncoding: CSV.Encoding['UTF-8'],
             outputEncoding: CSV.Encoding['ISO-8859-1']
         };
 

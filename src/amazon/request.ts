@@ -5,7 +5,7 @@ var xmlParse = require('xml2js').parseString;
 import crypto = require('crypto');
 var utf8 = require('utf8');
 import AmazonTypes = require('./types');
-var Iconv = require('iconv').Iconv;
+import iconv = require('iconv-lite');
 
 export class Request {
     private parameters: AmazonTypes.Parameter[];
@@ -67,8 +67,7 @@ export class Request {
                     if (process.env["NODE_ENV"] == 'development')
                         console.log('contentType of response', contentType);
 
-                    var converter = new Iconv(contentType, 'UTF-8');
-                    var convertedBody = converter.convert(body).toString();
+                    var convertedBody = iconv.decode(body, contentType).toString()
                     if (_.has(httpResponse.headers, 'content-md5')) {
                         // Catch md5 mismatch error
                         var calcResMd5 = this.hexStrToBase64(this.hex_md5(body));
