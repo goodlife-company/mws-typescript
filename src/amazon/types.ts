@@ -260,7 +260,8 @@ export interface OrderItem {
     ConditionSubtypeId?: ConditionSubtypeId,
     ScheduledDeliveryStartDate?: moment.Moment,
     ScheduledDeliveryEndDate?: moment.Moment,
-    PriceDesignation?: string
+    PriceDesignation?: string,
+    BuyerCustomizedInfo?: BuyerCustomizedInfo
 }
 
 export class ListOrderItemsResult {
@@ -402,6 +403,12 @@ export class ListOrderItemsResult {
 
             if (_.has(value, 'PriceDesignation'))
                 newOrderItem.PriceDesignation = value['PriceDesignation'];
+
+            if (_.has(value, 'BuyerCustomizedInfo') && _.has(value['BuyerCustomizedInfo'], 'CustomizedURL')) {
+                newOrderItem.BuyerCustomizedInfo = {
+                    CustomizedURL: value['BuyerCustomizedInfo']['CustomizedURL']
+                }
+            }
 
             this.orderItemList.push(newOrderItem);
         });
@@ -729,6 +736,10 @@ export enum ReportProcessingStatus { _SUBMITTED_, _IN_PROGRESS_, _CANCELLED_, _D
 export enum ConditionId { New, Used, Collectible, Refurbished, Preorder, Club };
 
 export enum ConditionSubtypeId { New, Mint, 'Very Good', Good, Acceptable, Poor, Club, OEM, Warranty, 'Refurbished Warranty', Refurbished, 'Open Box', Any, Other }
+
+export interface BuyerCustomizedInfo {
+    CustomizedURL: string
+}
 
 export enum OrderStatus { Pending, Unshipped, PartiallyShipped, Shipped, Canceled };
 

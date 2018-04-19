@@ -32,7 +32,7 @@ export class Request {
         var signature: string = this.getSignature();
         this.addParam(new AmazonTypes.StringParameter('Signature', signature));
 
-        var userAgent: string = 'pptest/1.0 (Language=Javascript)';
+        var userAgent: string = 'mwsts/1.0 (Language=Javascript)';
         var contentType: string = this.body ? AmazonTypes.FeedContentType[this.body['content-type']] : 'text/xml';
 
         var queryString: string = this.getQueryString();
