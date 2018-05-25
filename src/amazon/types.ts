@@ -115,9 +115,9 @@ export class OrderConverter {
             if (_.has(value['ShippingAddress'], 'AddressLine1'))
                 shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine1'];
             if (_.has(value['ShippingAddress'], 'AddressLine2'))
-                shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine2'];
+                shipAddress.AddressLine2 = value['ShippingAddress']['AddressLine2'];
             if (_.has(value['ShippingAddress'], 'AddressLine3'))
-                shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine3'];
+                shipAddress.AddressLine3 = value['ShippingAddress']['AddressLine3'];
 
             newOrder.ShippingAddress = shipAddress;
         }
