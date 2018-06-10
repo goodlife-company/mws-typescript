@@ -80,6 +80,7 @@ export class Request {
                 }
                 else {
                     // Expect content to be xml (content-type is not specified in every case)
+                    
                     xmlParse(body, { explicitArray: false }, function(err, result) {
                         if (err) {
                             // Catch error at XML parsing
