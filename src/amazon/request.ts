@@ -1,7 +1,7 @@
 import _ = require('underscore');
 import moment = require('moment');
 import request = require('request');
-var xmlParse = require('xml2js').parseString;
+var xml2js = require('xml2js');
 import crypto = require('crypto');
 var utf8 = require('utf8');
 import AmazonTypes = require('./types');
@@ -57,7 +57,7 @@ export class Request {
 
         request.post('https://' + this.credentials.host + this.endpoint + '?' + queryString, requestOptions, (err, httpResponse, body) => {
             if (err)
-                callback({ origin: 'PostRequest', message: err, metadata: httpResponse });
+                return callback({ origin: 'PostRequest', message: err, metadata: httpResponse });
             else {
                 // Detect non xml content and return without parsing
                 if (_.has(httpResponse.headers, 'content-type') && httpResponse.headers['content-type'][0].match(/^text\/plain/)) {
@@ -80,22 +80,30 @@ export class Request {
                 }
                 else {
                     // Expect content to be xml (content-type is not specified in every case)
-                    
-                    xmlParse(body, { explicitArray: false }, function(err, result) {
-                        if (err) {
-                            // Catch error at XML parsing
-                            callback({ origin: 'XMLParsing', message: err });
-                        } else if (_.has(result, 'ErrorResponse')) {
-                            // Catch error returned from API
-                            callback({ origin: 'MWS', message: result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error'] });
-                        } else {
-                            // Return parsed result
-                            callback(null, result);
-                        }
-                    });
+                    // Catch uncaught errors from xml parsing lib
+                    try {
+                        var parser = new xml2js.Parser({ explicitArray: false });
+                        parser.parseString(body, function(err, result) {
+                            if (err) {
+                                // Catch error at XML parsing
+                                console.error("mws-typescript#Error at xml parsing in xml2js", err);
+                                callback({ origin: 'XMLParsing', message: err });
+                            } else if (_.has(result, 'ErrorResponse')) {
+                                // Catch error returned from API
+                                console.error("mws-typescript#Error from Amazon API", result["ErrorResponse"]);
+                                callback({ origin: 'MWS', message: result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error'] });
+                            } else {
+                                console.log("having no errors, returning result");
+                                // Return parsed result
+                                callback(null, result);
+                            }
+                        });
+                    } catch (e) {
+                        console.error("mws-typescript#Uncaught error at xml parsing in", e);
+                        callback({ origin: 'XMLParsing#uncaughtException', message: JSON.stringify(e) });
+                    }
                 }
             }
-
         });
     }
 
