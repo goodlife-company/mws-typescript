@@ -90,7 +90,7 @@ export class Request {
                                 callback({ origin: 'XMLParsing', message: err });
                             } else if (_.has(result, 'ErrorResponse')) {
                                 // Catch error returned from API
-                                console.error("mws-typescript#Error from Amazon API", queryString.substr(0, 100), result["ErrorResponse"]);
+                                console.error("mws-typescript#Error from Amazon API", queryString.substr(0, 200), result["ErrorResponse"]);
                                 callback({ origin: 'MWS', message: result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error'] });
                             } else {
                                 // Return parsed result
