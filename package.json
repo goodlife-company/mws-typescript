@@ -10,7 +10,8 @@
     "scripts": {
         "pretest": "tsc -p src/spec",
         "test": "jasmine",
-        "prepare": "tsc"
+        "build": "tsc",
+        "postinstall": "npm run build"
     },
     "devDependencies": {
         "@types/jasmine": "^2.8.16",
