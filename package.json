@@ -10,7 +10,7 @@
     "scripts": {
         "pretest": "tsc -p src/spec",
         "test": "jasmine",
-        "postinstall": "./node_modules/.bin/tsc"
+        "prepare": "tsc"
     },
     "devDependencies": {
         "@types/jasmine": "^2.8.16",
