@@ -1,15 +1,15 @@
 import _ = require('underscore');
 import moment = require('moment');
 import request = require('request');
-var xml2js = require('xml2js');
+import xml2js = require('xml2js');
 import crypto = require('crypto');
-var utf8 = require('utf8');
 import AmazonTypes = require('./types');
 import iconv = require('iconv-lite');
 
 export class Request {
     private parameters: AmazonTypes.Parameter[];
     private body: AmazonTypes.BodyData;
+    private xmlParser: xml2js.Parser;
 
     constructor(private endpoint: string, private credentials: AmazonTypes.Credentials) {
         this.parameters = [];
@@ -17,6 +17,7 @@ export class Request {
         this.addParam(new AmazonTypes.StringParameter('SignatureMethod', 'HmacSHA256'));
         this.addParam(new AmazonTypes.StringParameter('SignatureVersion', '2'));
         this.addParam(new AmazonTypes.TimestampParameter('Timestamp', moment()));
+        this.xmlParser = new xml2js.Parser({ explicitArray: false });
     }
 
     public addParam(param: AmazonTypes.Parameter) {
@@ -82,8 +83,7 @@ export class Request {
                     // Expect content to be xml (content-type is not specified in every case)
                     // Catch uncaught errors from xml parsing lib
                     try {
-                        var parser = new xml2js.Parser({ explicitArray: false });
-                        parser.parseString(body, function(err, result) {
+                        this.xmlParser.parseString(body, function(err, result) {
                             if (err) {
                                 // Catch error at XML parsing
                                 console.error("mws-typescript#Error at xml parsing in xml2js", err);

@@ -22,14 +22,13 @@
         "@types/node": "^8.0.31",
         "@types/request": "^2.0.3",
         "@types/underscore": "^1.8.3",
-        "@types/xml2js": "^0.4.0",
+        "@types/xml2js": "^0.4.4",
         "async": "^2.6.2",
         "iconv-lite": "^0.4.21",
         "jszip": "^3.1.5",
         "moment": "^2.24.0",
         "request": "^2.88.0",
         "underscore": "1.8.3",
-        "utf8": "2.1.1",
         "xml2js": "^0.4.19"
     }
 }
