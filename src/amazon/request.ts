@@ -61,8 +61,8 @@ export class Request {
                 return callback({ origin: 'PostRequest', message: err, metadata: httpResponse });
             else {
                 // Detect non xml content and return without parsing
-                if (_.has(httpResponse.headers, 'content-type') && httpResponse.headers['content-type'][0].match(/^text\/plain/)) {
-                    var contentType = httpResponse.headers['content-type'][0];
+                if (_.has(httpResponse.headers, 'content-type') && httpResponse.headers['content-type'].match(/^text\/plain/)) {
+                    var contentType = httpResponse.headers['content-type'];
                     contentType = contentType.substr(contentType.indexOf("=") + 1);
 
                     if (process.env["NODE_ENV"] == 'development')
