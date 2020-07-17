@@ -1,15 +1,15 @@
 import _ = require('underscore');
 import moment = require('moment');
 import request = require('request');
-var xmlParse = require('xml2js').parseString;
+import xml2js = require('xml2js');
 import crypto = require('crypto');
-var utf8 = require('utf8');
 import AmazonTypes = require('./types');
-var Iconv = require('iconv').Iconv;
+import iconv = require('iconv-lite');
 
 export class Request {
     private parameters: AmazonTypes.Parameter[];
     private body: AmazonTypes.BodyData;
+    private xmlParser: xml2js.Parser;
 
     constructor(private endpoint: string, private credentials: AmazonTypes.Credentials) {
         this.parameters = [];
@@ -17,6 +17,7 @@ export class Request {
         this.addParam(new AmazonTypes.StringParameter('SignatureMethod', 'HmacSHA256'));
         this.addParam(new AmazonTypes.StringParameter('SignatureVersion', '2'));
         this.addParam(new AmazonTypes.TimestampParameter('Timestamp', moment()));
+        this.xmlParser = new xml2js.Parser({ explicitArray: false });
     }
 
     public addParam(param: AmazonTypes.Parameter) {
@@ -32,12 +33,12 @@ export class Request {
         var signature: string = this.getSignature();
         this.addParam(new AmazonTypes.StringParameter('Signature', signature));
 
-        var userAgent: string = 'pptest/1.0 (Language=Javascript)';
+        var userAgent: string = 'mwsts/1.0 (Language=Javascript)';
         var contentType: string = this.body ? AmazonTypes.FeedContentType[this.body['content-type']] : 'text/xml';
 
         var queryString: string = this.getQueryString();
 
-        if (process.env.NODE_ENV == 'development')
+        if (process.env["NODE_ENV"] == 'development')
             console.log('MWS QueryString', queryString);
 
         var requestOptions = {
@@ -57,18 +58,17 @@ export class Request {
 
         request.post('https://' + this.credentials.host + this.endpoint + '?' + queryString, requestOptions, (err, httpResponse, body) => {
             if (err)
-                callback({ origin: 'PostRequest', message: err, metadata: httpResponse });
+                return callback({ origin: 'PostRequest', message: err, metadata: httpResponse });
             else {
                 // Detect non xml content and return without parsing
-                if (_.has(httpResponse.headers, 'content-type') && httpResponse.headers['content-type'].match(/^text\/plain/)) {
-                    var contentType = httpResponse.headers['content-type'];
+                if (_.has(httpResponse.headers, 'content-type') && httpResponse.headers['content-type'][0].match(/^text\/plain/)) {
+                    var contentType = httpResponse.headers['content-type'][0];
                     contentType = contentType.substr(contentType.indexOf("=") + 1);
 
-                    if (process.env.NODE_ENV == 'development')
+                    if (process.env["NODE_ENV"] == 'development')
                         console.log('contentType of response', contentType);
 
-                    var converter = new Iconv(contentType, 'UTF-8');
-                    var convertedBody = converter.convert(body).toString();
+                    var convertedBody = iconv.decode(body, contentType).toString()
                     if (_.has(httpResponse.headers, 'content-md5')) {
                         // Catch md5 mismatch error
                         var calcResMd5 = this.hexStrToBase64(this.hex_md5(body));
@@ -81,21 +81,28 @@ export class Request {
                 }
                 else {
                     // Expect content to be xml (content-type is not specified in every case)
-                    xmlParse(body, { explicitArray: false }, function(err, result) {
-                        if (err) {
-                            // Catch error at XML parsing
-                            callback({ origin: 'XMLParsing', message: err });
-                        } else if (_.has(result, 'ErrorResponse')) {
-                            // Catch error returned from API
-                            callback({ origin: 'MWS', message: result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error'] });
-                        } else {
-                            // Return parsed result
-                            callback(null, result);
-                        }
-                    });
+                    // Catch uncaught errors from xml parsing lib
+                    try {
+                        this.xmlParser.parseString(body, function(err, result) {
+                            if (err) {
+                                // Catch error at XML parsing
+                                console.error("mws-typescript#Error at xml parsing in xml2js", err);
+                                callback({ origin: 'XMLParsing', message: err });
+                            } else if (_.has(result, 'ErrorResponse')) {
+                                // Catch error returned from API
+                                console.error("mws-typescript#Error from Amazon API", queryString.substr(0, 200), result["ErrorResponse"]);
+                                callback({ origin: 'MWS', message: result['ErrorResponse']['Error']['Message'], metadata: result['ErrorResponse']['Error'] });
+                            } else {
+                                // Return parsed result
+                                callback(null, result);
+                            }
+                        });
+                    } catch (e) {
+                        console.error("mws-typescript#Uncaught error at xml parsing in", e);
+                        callback({ origin: 'XMLParsing#uncaughtException', message: JSON.stringify(e) });
+                    }
                 }
             }
-
         });
     }
 

@@ -1,5 +1,3 @@
-///<reference path="../../typings/main.d.ts"/>
-
 import moment = require('moment');
 import Amazon = require('../amazon/api');
 import util = require('util');
@@ -179,4 +177,14 @@ describe('Amazon', function() {
     //     });
     //
     // });
+
+    it('can download customized data', function(done) {
+        var url = "";
+        amazon.Orders.getCustomizedDataByUrl(url, "24645420752043", (err, result) => {
+            console.log('error', err);
+            console.log('resulting data', util.inspect(result, { depth: null, colors : true}));
+            expect(err).toBeFalsy();
+            done();
+        });
+    })
 });

@@ -1,7 +1,9 @@
 import _ = require('underscore');
 import moment = require('moment');
+import requestLib = require('request');
 import AmazonTypes = require('./types');
 import Request = require('./request');
+import jszip = require('jszip');
 
 export class Orders {
     private endpoint: string = '/Orders/2013-09-01';
@@ -78,6 +80,25 @@ export class Orders {
         });
     }
 
+    public listOrdersByNextToken(options: AmazonTypes.ListOrdersByNextTokenRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.ListOrdersByNextTokenResult) => void) {
+        var request: Request.Request = new Request.Request(this.endpoint, this.credentials);
+
+        request.addParam(new AmazonTypes.StringParameter('Action', 'ListOrdersByNextToken'));
+        request.addParam(new AmazonTypes.StringParameter('SellerId', this.credentials.sellerId));
+        request.addParam(new AmazonTypes.StringParameter('Version', this.version));
+
+        request.addParam(new AmazonTypes.StringParameter('NextToken', options.NextToken));
+
+        request.send(function(err, result) {
+            if (err) {
+                callback(err);
+            }
+            else {
+                callback(null, new AmazonTypes.ListOrdersByNextTokenResult(result));
+            }
+        });
+    }
+
     public listOrderItems(options: AmazonTypes.ListOrderItemsRequest, callback: (err?: AmazonTypes.Error, result?: AmazonTypes.ListOrderItemsResult) => void) {
         var request: Request.Request = new Request.Request(this.endpoint, this.credentials);
 
@@ -114,5 +135,34 @@ export class Orders {
                 callback(null, new AmazonTypes.GetOrderResult(result));
             }
         });
+    }
+
+    public getCustomizedDataByUrl(url: string, orderItemId: string, callback: (err?: Error, data?: any) => void) {
+        requestLib({
+            method: "GET",
+            url: url,
+            encoding: null // <- this one is important !
+        }, (err, response, body) => {
+            if (err || response.statusCode !== 200) {
+                console.error('Error when download customized data from MWS', response.statusCode, err);
+                return callback(new Error('Error when download customized data from MWS, HTTP ' + response.statusCode))
+            }
+
+            jszip.loadAsync(body).then((zip) => {
+                var fileName = orderItemId + '.json';
+                var fileInZip = zip.file(fileName);
+                if (!fileInZip)
+                    return callback(new Error("File not found in zip " + fileName));
+
+                fileInZip.async("text").then((jsonContent) => {
+                    try {
+                        var parsedData = JSON.parse(jsonContent);
+                        callback(null, parsedData);
+                    } catch (err) {
+                        callback(err);
+                    }
+                }).catch(callback);
+            }).catch(callback);
+        })
     }
 }

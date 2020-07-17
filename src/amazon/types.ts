@@ -35,6 +35,10 @@ export interface ListOrdersRequest {
     MaxResultsPerPage?: number;
 }
 
+export interface ListOrdersByNextTokenRequest {
+    NextToken: string
+}
+
 export interface Order {
     AmazonOrderId: string,
     SellerOrderId?: string,
@@ -111,9 +115,9 @@ export class OrderConverter {
             if (_.has(value['ShippingAddress'], 'AddressLine1'))
                 shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine1'];
             if (_.has(value['ShippingAddress'], 'AddressLine2'))
-                shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine2'];
+                shipAddress.AddressLine2 = value['ShippingAddress']['AddressLine2'];
             if (_.has(value['ShippingAddress'], 'AddressLine3'))
-                shipAddress.AddressLine1 = value['ShippingAddress']['AddressLine3'];
+                shipAddress.AddressLine3 = value['ShippingAddress']['AddressLine3'];
 
             newOrder.ShippingAddress = shipAddress;
         }
@@ -187,8 +191,10 @@ export class OrderConverter {
 
 export class ListOrdersResult {
     public orderList: Order[];
+    public nextToken: string;
     constructor(public rawData: any) {
         this.orderList = [];
+        this.nextToken = null;
 
         if (rawData['ListOrdersResponse']['ListOrdersResult']['Orders'] == '')
             return;
@@ -198,6 +204,28 @@ export class ListOrdersResult {
         var orderList = _.isArray(rawList) ? rawList : [rawList];
 
         this.orderList = _.map(orderList, OrderConverter.convertFromParsedXML);
+        if (rawData['ListOrdersResponse']['ListOrdersResult']['NextToken'])
+            this.nextToken = rawData['ListOrdersResponse']['ListOrdersResult']['NextToken'];
+    }
+}
+
+export class ListOrdersByNextTokenResult {
+    public orderList: Order[];
+    public nextToken: string;
+    constructor(public rawData: any) {
+        this.orderList = [];
+        this.nextToken = null;
+
+        if (rawData['ListOrdersByNextTokenResponse']['ListOrdersByNextTokenResult']['Orders'] == '')
+            return;
+
+        var rawList = rawData['ListOrdersByNextTokenResponse']['ListOrdersByNextTokenResult']['Orders']['Order'];
+
+        var orderList = _.isArray(rawList) ? rawList : [rawList];
+
+        this.orderList = _.map(orderList, OrderConverter.convertFromParsedXML);
+        if (rawData['ListOrdersByNextTokenResponse']['ListOrdersByNextTokenResult']['NextToken'])
+            this.nextToken = rawData['ListOrdersByNextTokenResponse']['ListOrdersByNextTokenResult']['NextToken'];
     }
 }
 
@@ -232,7 +260,8 @@ export interface OrderItem {
     ConditionSubtypeId?: ConditionSubtypeId,
     ScheduledDeliveryStartDate?: moment.Moment,
     ScheduledDeliveryEndDate?: moment.Moment,
-    PriceDesignation?: string
+    PriceDesignation?: string,
+    BuyerCustomizedInfo?: BuyerCustomizedInfo
 }
 
 export class ListOrderItemsResult {
@@ -374,6 +403,12 @@ export class ListOrderItemsResult {
 
             if (_.has(value, 'PriceDesignation'))
                 newOrderItem.PriceDesignation = value['PriceDesignation'];
+
+            if (_.has(value, 'BuyerCustomizedInfo') && _.has(value['BuyerCustomizedInfo'], 'CustomizedURL')) {
+                newOrderItem.BuyerCustomizedInfo = {
+                    CustomizedURL: value['BuyerCustomizedInfo']['CustomizedURL']
+                }
+            }
 
             this.orderItemList.push(newOrderItem);
         });
@@ -701,6 +736,10 @@ export enum ReportProcessingStatus { _SUBMITTED_, _IN_PROGRESS_, _CANCELLED_, _D
 export enum ConditionId { New, Used, Collectible, Refurbished, Preorder, Club };
 
 export enum ConditionSubtypeId { New, Mint, 'Very Good', Good, Acceptable, Poor, Club, OEM, Warranty, 'Refurbished Warranty', Refurbished, 'Open Box', Any, Other }
+
+export interface BuyerCustomizedInfo {
+    CustomizedURL: string
+}
 
 export enum OrderStatus { Pending, Unshipped, PartiallyShipped, Shipped, Canceled };
 

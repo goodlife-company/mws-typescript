@@ -1,4 +1,3 @@
-///<reference path="../../typings/main.d.ts"/>
 import CSV = require('../csv/CSVExport');
 import Schemas = require('../amazon/schemas');
 import fs = require('fs');

@@ -24,7 +24,6 @@ export var FlatFileOrderFulfillmentFeedOptions: CSV.Options = {
     columnDelim: "\t",
     lineDelim: "\r\n",
     decSep: '.',
-    inputEncoding: CSV.Encoding['UTF-8'],
     outputEncoding: CSV.Encoding['ISO-8859-1']
 }
 
@@ -49,6 +48,5 @@ export var FlatFilePriceandQuantityUpdateFeedOptions: CSV.Options = {
     columnDelim: "\t",
     lineDelim: "\r\n",
     decSep: ',',
-    inputEncoding: CSV.Encoding['UTF-8'],
     outputEncoding: CSV.Encoding['ISO-8859-1']
 }

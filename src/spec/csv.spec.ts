@@ -1,4 +1,3 @@
-///<reference path="../../typings/main.d.ts"/>
 import CSV = require('../csv/CSVExport');
 import fs = require('fs');
 
@@ -49,7 +48,7 @@ describe('CSV', function() {
             columnDelim: "\t",
             lineDelim: "\r\n",
             decSep: "D",
-            inputEncoding: CSV.Encoding['UTF-8'],
+            // inputEncoding: CSV.Encoding['UTF-8'],
             outputEncoding: CSV.Encoding['ISO-8859-1']
         };
 

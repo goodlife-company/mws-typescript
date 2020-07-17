@@ -1,6 +1,6 @@
 import _ = require('underscore');
 import fs = require('fs');
-var Iconv = require('iconv').Iconv;
+import iconv = require('iconv-lite');
 
 export interface Options {
     columns: string[],
@@ -9,7 +9,6 @@ export interface Options {
     columnDelim: string,
     lineDelim: string,
     decSep: string,
-    inputEncoding: Encoding,
     outputEncoding: Encoding
 }
 
@@ -25,12 +24,10 @@ export enum Encoding { 'UTF-8', 'ISO-8859-1' };
 
 export class CSVGenerator {
     private escReg: RegExp;
-    private converter: any;
     private completeOutput : string;
 
     constructor(private options: Options){
         this.escReg = new RegExp('"', 'g');
-        this.converter = new Iconv(Encoding[options.inputEncoding], Encoding[options.outputEncoding]);
         this.completeOutput = '';
     }
 
@@ -90,7 +87,6 @@ export class CSVExport {
         this.options = options;
         this.filePath = filePath;
         this.escReg = new RegExp('"', 'g');
-        this.converter = new Iconv(Encoding[options.inputEncoding], Encoding[options.outputEncoding]);
     }
 
     public start(callback: ReadyCallback) {
@@ -106,7 +102,7 @@ export class CSVExport {
         header += this.options.columns.join(this.options.columnDelim) + this.options.lineDelim;
 
         // Write header to file
-        CSVExport.writeToStream(this.converter.convert(header), this.stream, callback);
+        CSVExport.writeToStream(iconv.encode(header, Encoding[this.options.outputEncoding]), this.stream, callback);
     }
 
     public record(data: Object, callback: ReadyCallback) {
@@ -124,7 +120,7 @@ export class CSVExport {
         });
 
         outputString += this.options.lineDelim;
-        CSVExport.writeToStream(this.converter.convert(outputString), this.stream, callback);
+        CSVExport.writeToStream(iconv.encode(outputString, Encoding[this.options.outputEncoding]), this.stream, callback);
     };
 
     public close(callback: CloseCallback) {
