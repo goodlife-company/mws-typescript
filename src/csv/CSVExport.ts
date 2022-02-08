@@ -51,7 +51,7 @@ export class CSVGenerator {
         _.each(this.options.columns, (elm, index, list) => {
             // Take value from input data or default value or empty string (in this order) and escape the result
             var dataValue: string = this.escapeString(_.has(data, elm) ? data[elm] : (_.has(self.options.defaults, elm) ? self.options.defaults[elm] : ''));
-            if (_.isNumber(dataValue))
+            if (_.isNumber(dataValue as any))
                 dataValue = dataValue.toString().replace('.', self.options.decSep);
 
             // Append column separator, if not in last column
@@ -112,7 +112,7 @@ export class CSVExport {
         _.each(this.options.columns, function(elm, index, list) {
             // Take value from input data or default value or empty string (in this order) and escape the result
             var dataValue: string = self.escapeString(_.has(data, elm) ? data[elm] : (_.has(self.options.defaults, elm) ? self.options.defaults[elm] : ''));
-            if (_.isNumber(dataValue))
+            if (_.isNumber(dataValue as any))
                 dataValue = dataValue.toString().replace('.', self.options.decSep);
 
             // Append column separator, if not in last column
